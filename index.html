@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sun Tap</title>
+    <style>
+        body { background: #000; color: white; text-align: center; font-family: sans-serif; overflow: hidden; margin: 0; }
+        #sun { font-size: 150px; cursor: pointer; user-select: none; transition: transform 0.1s; display: block; margin: 100px auto 20px; -webkit-tap-highlight-color: transparent; }
+        #sun:active { transform: scale(1.2); }
+        #score { font-size: 40px; font-weight: bold; margin-top: 50px; color: #ffeb3b; }
+        .plus-one { position: absolute; color: #ffeb3b; font-size: 24px; animation: moveUp 0.5s ease-out forwards; pointer-events: none; }
+        @keyframes moveUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
+    </style>
+</head>
+<body>
+    <div id="score">0</div>
+    <div id="sun">☀️</div>
+    <p>Тапай весеннее солнышко!</p>
+
+    <script>
+        let count = 0;
+        const sun = document.getElementById('sun');
+        const score = document.getElementById('score');
+
+        sun.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            count++;
+            score.innerText = count;
+            
+            const plus = document.createElement('div');
+            plus.innerText = '+1';
+            plus.className = 'plus-one';
+            plus.style.left = e.touches[0].clientX + 'px';
+            plus.style.top = e.touches[0].clientY + 'px';
+            document.body.appendChild(plus);
+            setTimeout(() => plus.remove(), 500);
+        });
+    </script>
+</body>
+</html>
