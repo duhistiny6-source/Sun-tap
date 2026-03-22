@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,50 +8,89 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: radial-gradient(circle, #1a1a2e 0%, #000 100%); color: white; text-align: center; font-family: sans-serif; overflow: hidden; margin: 0; padding: 0; height: 100vh; }
-        .page { display: none; padding: 20px; height: calc(100vh - 80px); overflow-y: auto; }
+        .page { display: none; padding: 20px; height: calc(100vh - 100px); overflow-y: auto; }
         .page.active { display: block; }
+        
+        /* Стили игры */
         #score { font-size: 48px; font-weight: bold; margin-top: 40px; color: #ffeb3b; text-shadow: 0 0 20px rgba(255, 235, 59, 0.5); }
-        #sun { font-size: 140px; cursor: pointer; user-select: none; transition: transform 0.1s; display: inline-block; margin-top: 40px; filter: drop-shadow(0 0 30px #ff9800); -webkit-tap-highlight-color: transparent; }
-        #sun:active { transform: scale(1.15); }
-        .task-card { background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-action { background: #ffeb3b; color: #000; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: rgba(20, 20, 20, 0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; backdrop-filter: blur(10px); }
-        .nav-item { color: #888; text-decoration: none; font-size: 12px; cursor: pointer; transition: 0.3s; text-align: center; }
-        .nav-item.active { color: #ffeb3b; transform: translateY(-5px); }
-        .nav-icon { font-size: 24px; display: block; }
-        .plus-one { position: absolute; color: #fff; font-size: 28px; font-weight: bold; animation: moveUp 0.8s ease-out forwards; pointer-events: none; text-shadow: 0 0 10px #ffeb3b; }
-        @keyframes moveUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-150px); } }
+        #sun { font-size: 140px; cursor: pointer; user-select: none; transition: transform 0.1s; display: inline-block; margin-top: 20px; filter: drop-shadow(0 0 30px #ff9800); -webkit-tap-highlight-color: transparent; }
+        #sun:active { transform: scale(1.1); }
+
+        /* Карточки заданий */
+        .task-card { background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .task-info { text-align: left; }
+        .task-reward { color: #ffeb3b; font-size: 14px; font-weight: bold; }
+        
+        /* Кнопки */
+        .btn-action { background: #ffeb3b; color: #000; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .btn-action:disabled { background: #555; color: #aaa; }
+
+        /* Навигация */
+        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: rgba(15, 15, 15, 0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; backdrop-filter: blur(10px); padding-bottom: 10px; }
+        .nav-item { color: #888; text-decoration: none; font-size: 11px; cursor: pointer; transition: 0.3s; text-align: center; flex: 1; }
+        .nav-item.active { color: #ffeb3b; }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+
+        /* Всплывающий текст +1 */
+        .plus-one { position: absolute; color: #fff; font-size: 26px; font-weight: bold; animation: moveUp 0.8s ease-out forwards; pointer-events: none; }
+        @keyframes moveUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-120px); } }
     </style>
 </head>
 <body>
+
     <div id="game-page" class="page active">
         <div id="score">0</div>
         <div id="sun">☀️</div>
-        <p>Умножай свет каждым касанием</p>
+        <p style="opacity: 0.7; margin-top: 20px;">Наполняй мир светом</p>
     </div>
+
     <div id="tasks-page" class="page">
         <h2>Добрые дела</h2>
-        <div class="task-card"><span>Подписаться на канал</span><button class="btn-action">+500☀️</button></div>
-        <div class="task-card"><span>Пригласить друга</span><button class="btn-action">+1000☀️</button></div>
+        <div class="task-card">
+            <div class="task-info"><div>Посмотреть рекламу</div><div class="task-reward">+100 ☀️</div></div>
+            <button class="btn-action" onclick="watchAd(this)">Смотреть</button>
+        </div>
+        <div class="task-card">
+            <div class="task-info"><div>Подписка на канал</div><div class="task-reward">+500 ☀️</div></div>
+            <button class="btn-action" onclick="doTask(this, 500)">Выполнить</button>
+        </div>
     </div>
+
+    <div id="friends-page" class="page">
+        <h2>Друзья</h2>
+        <div style="font-size: 50px; margin: 20px 0;">👥</div>
+        <p>Приглашай друзей и получай <br><span style="color:#ffeb3b">+1000 ☀️</span> за каждого!</p>
+        <button class="btn-action" style="width: 100%; padding: 15px;" onclick="inviteFriend()">Пригласить друга</button>
+    </div>
+
     <div id="wallet-page" class="page">
-        <h2>Мой свет</h2>
-        <button class="btn-action" style="margin-top: 20px;">Подключить Кошелек</button>
+        <h2>Кошелек</h2>
+        <div style="font-size: 50px; margin: 20px 0;">💎</div>
+        <p>Скоро здесь можно будет обменять <br>твой свет на токены TON</p>
+        <button class="btn-action" style="width: 100%; padding: 15px; background: #0088cc; color: white;">Connect Wallet</button>
     </div>
+
     <nav>
         <div class="nav-item active" onclick="showPage('game-page', this)"><span class="nav-icon">☀️</span>Игра</div>
         <div class="nav-item" onclick="showPage('tasks-page', this)"><span class="nav-icon">📜</span>Задания</div>
+        <div class="nav-item" onclick="showPage('friends-page', this)"><span class="nav-icon">👥</span>Друзья</div>
         <div class="nav-item" onclick="showPage('wallet-page', this)"><span class="nav-icon">💎</span>Кошелек</div>
     </nav>
+
     <script>
-        let count = 0;
         const tg = window.Telegram.WebApp;
         tg.expand();
+
+        let count = parseInt(localStorage.getItem('sun_score')) || 0;
+        document.getElementById('score').innerText = count;
+
+        // Клик по солнцу
         document.getElementById('sun').addEventListener('touchstart', (e) => {
             e.preventDefault();
             count++;
-            document.getElementById('score').innerText = count;
-            tg.HapticFeedback.impactOccurred('medium');
+            updateScore();
+            tg.HapticFeedback.impactOccurred('light');
+
             const plus = document.createElement('div');
             plus.innerText = '+1';
             plus.className = 'plus-one';
@@ -59,6 +99,38 @@
             document.body.appendChild(plus);
             setTimeout(() => plus.remove(), 800);
         });
+
+        function updateScore() {
+            document.getElementById('score').innerText = count;
+            localStorage.setItem('sun_score', count);
+        }
+
+        // Функция просмотра рекламы (имитация)
+        function watchAd(btn) {
+            btn.innerText = "Смотрим... (5с)";
+            btn.disabled = true;
+            setTimeout(() => {
+                count += 100;
+                updateScore();
+                btn.innerText = "Готово ✅";
+                tg.HapticFeedback.notificationOccurred('success');
+            }, 5000);
+        }
+
+        function doTask(btn, reward) {
+            count += reward;
+            updateScore();
+            btn.innerText = "✅";
+            btn.disabled = true;
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function inviteFriend() {
+            const botUrl = "https://t.me/my_new_game_top_bot"; // ЗАМЕНИ НА СВОЙ URL БОТА
+            const text = "Присоединяйся к Sun Tap и наполни мир светом!";
+            tg.openTelegramLink(`https://t.me/share/url?url=${botUrl}&text=${text}`);
+        }
+
         function showPage(pageId, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
